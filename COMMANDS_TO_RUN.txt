@@ -1,0 +1,179 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                    2 WAY LOCK - GIT PUSH COMMANDS                         ║
+║                                                                            ║
+║              Copy & Paste These Commands Into Git Bash                    ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+STEP 1: OPEN GIT BASH
+═══════════════════════════════════════════════════════════════════════════
+
+Right-click in your project folder → "Git Bash Here"
+
+OR
+
+Open Git Bash and run: cd /path/to/2-way-lock
+
+
+STEP 2: COPY & PASTE THESE COMMANDS ONE BY ONE
+═══════════════════════════════════════════════════════════════════════════
+
+
+COMMAND 1 - Initialize Git Repository
+──────────────────────────────────────────────────────────────────────────
+
+git init
+
+
+COMMAND 2 - Add All Files
+──────────────────────────────────────────────────────────────────────────
+
+git add .
+
+
+COMMAND 3 - Create Initial Commit
+──────────────────────────────────────────────────────────────────────────
+
+git commit -m "Initial commit: 2 Way Lock - Professional networking platform with Google OAuth and Vercel deployment"
+
+
+COMMAND 4 - Rename Branch to Main
+──────────────────────────────────────────────────────────────────────────
+
+git branch -M main
+
+
+COMMAND 5 - Add Remote Repository
+──────────────────────────────────────────────────────────────────────────
+
+git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git
+
+
+COMMAND 6 - Push to GitHub
+──────────────────────────────────────────────────────────────────────────
+
+git push -u origin main
+
+
+STEP 3: AUTHENTICATE
+═══════════════════════════════════════════════════════════════════════════
+
+When Git Bash asks:
+
+Username: yeshwanth851314-star
+
+Password: [Paste your Personal Access Token here]
+
+
+HOW TO GET PERSONAL ACCESS TOKEN
+═══════════════════════════════════════════════════════════════════════════
+
+1. Go to: https://github.com/settings/tokens
+2. Click "Generate new token"
+3. Name: 2-way-lock-push
+4. Select: repo, workflow
+5. Click "Generate token"
+6. Copy the token
+7. Paste when Git Bash asks for password
+
+
+STEP 4: VERIFY SUCCESS
+═══════════════════════════════════════════════════════════════════════════
+
+Run this command:
+
+git log --oneline
+
+
+You should see your commit. Then visit:
+
+https://github.com/yeshwanth851314-star/2-way-lock
+
+You should see all your files uploaded!
+
+
+OPTIONAL: RUN ALL COMMANDS AT ONCE
+═══════════════════════════════════════════════════════════════════════════
+
+If you want to run all commands together (not recommended for first time):
+
+git init && git add . && git commit -m "Initial commit: 2 Way Lock - Professional networking platform with Google OAuth and Vercel deployment" && git branch -M main && git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git && git push -u origin main
+
+
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════
+
+Problem: "fatal: not a git repository"
+Solution: git init
+
+Problem: "fatal: remote origin already exists"
+Solution: 
+  git remote remove origin
+  git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git
+
+Problem: "Authentication failed"
+Solution: Use Personal Access Token (not GitHub password)
+
+Problem: "nothing to commit, working tree clean"
+Solution: git push -u origin main
+
+
+WHAT GETS PUSHED
+═══════════════════════════════════════════════════════════════════════════
+
+✓ All 40+ backend files
+✓ Database schema (30+ models)
+✓ Docker configuration
+✓ Vercel deployment config
+✓ GitHub Actions CI/CD
+✓ All documentation
+✓ API endpoints (25+)
+✓ Environment configuration
+
+
+NEXT STEPS AFTER PUSH
+═══════════════════════════════════════════════════════════════════════════
+
+1. Deploy to Vercel
+   npm i -g vercel
+   vercel login
+   vercel --prod
+
+2. Add Environment Variables in Vercel Dashboard
+   DATABASE_URL
+   REDIS_URL
+   JWT_SECRET
+   JWT_REFRESH_SECRET
+   GOOGLE_CLIENT_ID
+   GOOGLE_CLIENT_SECRET
+   GOOGLE_CALLBACK_URL
+   OPENAI_API_KEY
+   NODE_ENV=production
+
+3. Setup Google OAuth
+   - Go to Google Cloud Console
+   - Create OAuth 2.0 credentials
+   - Add redirect URIs
+   - Copy Client ID and Secret
+
+4. Setup Database
+   - Use Vercel Postgres or external database
+   - Add DATABASE_URL
+
+5. Setup Redis
+   - Use Upstash Redis or external Redis
+   - Add REDIS_URL
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+✓ ALL FILES WILL BE PUSHED TO YOUR GITHUB REPOSITORY!
+
+Repository: https://github.com/yeshwanth851314-star/2-way-lock
+
+Your professional networking platform will be live in 20 minutes! 🚀
+
+═══════════════════════════════════════════════════════════════════════════
+

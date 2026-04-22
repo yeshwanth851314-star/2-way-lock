@@ -1,0 +1,920 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum AccountType {
+  INDIVIDUAL
+  COMPANY
+  STUDENT
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum VerificationBadge {
+  NONE
+  INDIVIDUAL_VERIFIED
+  COMPANY_VERIFIED
+  STARTUP_VERIFIED
+}
+
+enum StartupTier {
+  JUST_STARTED
+  MID_LEVEL
+  UNICORN
+}
+
+enum JobListingType {
+  JOB
+  INTERNSHIP
+  FREELANCE
+  STARTUP_ROLE
+}
+
+enum WorkMode {
+  ONLINE
+  OFFLINE
+  HYBRID
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  FREELANCE
+  STARTUP
+}
+
+enum ExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  LEAD
+}
+
+enum ProficiencyLevel {
+  BEGINNER
+  INTERMEDIATE
+  EXPERT
+}
+
+enum ApplicationStatus {
+  APPLIED
+  VIEWED
+  SHORTLISTED
+  INTERVIEW
+  OFFERED
+  REJECTED
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum NotificationType {
+  CONNECTION_REQUEST
+  MESSAGE
+  APPLICATION_STATUS
+  AI_MATCH_ALERT
+  ENDORSEMENT
+  POST_INTERACTION
+  LISTING_EXPIRY
+  VERIFICATION_STATUS
+}
+
+enum ScanStatus {
+  PENDING
+  CLEAN
+  THREAT_DETECTED
+  SCAN_FAILED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  FILE
+  LINK
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  DOCUMENT
+  POLL
+  ARTICLE
+  JOB_OPPORTUNITY
+}
+
+enum ReactionType {
+  THUMBS_UP
+  CELEBRATE
+  SUPPORT
+  CURIOUS
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  CONNECTIONS_ONLY
+  PRIVATE
+}
+
+enum MessagePermission {
+  EVERYONE
+  CONNECTIONS_ONLY
+  GIVERS_ONLY
+  NOBODY
+}
+
+enum ThemePreset {
+  MIDNIGHT_PURPLE
+  OCEAN_TEAL
+  AMBER_FORGE
+  ROSE_BLOOM
+  SLATE_GRAY
+  FOREST_GREEN
+  CORAL_DUSK
+  ARCTIC_BLUE
+}
+
+enum CardStyle {
+  FLAT
+  BORDERED
+  GLASSMORPHISM
+}
+
+enum FontChoice {
+  MODERN
+  CLASSIC
+  MINIMAL
+}
+
+enum EmailDigestFrequency {
+  REAL_TIME
+  DAILY
+  WEEKLY
+  NEVER
+}
+
+// ============================================================================
+// CORE USER MODELS
+// ============================================================================
+
+model User {
+  id                    String                @id @default(cuid())
+  email                 String                @unique
+  passwordHash          String
+  accountType           AccountType
+  verificationStatus    VerificationStatus    @default(UNVERIFIED)
+  verificationBadge     VerificationBadge     @default(NONE)
+  
+  // Profile
+  profile               Profile?
+  
+  // Verification documents
+  identityVerification  IdentityVerification?
+  companyVerification   CompanyVerification?
+  
+  // Content
+  certifications        Certification[]
+  projects              Project[]
+  jobListings           JobListing[]
+  applications          Application[]
+  posts                 Post[]
+  comments              Comment[]
+  reactions             Reaction[]
+  
+  // Social
+  sentConnections       Connection[]          @relation("requester")
+  receivedConnections   Connection[]          @relation("target")
+  sentMessages          Message[]             @relation("sender")
+  receivedMessages      Message[]             @relation("recipient")
+  conversations         Conversation[]        @relation("participant")
+  
+  // AI & Matching
+  aiMatches             AIMatch[]
+  
+  // Notifications
+  notifications         Notification[]
+  
+  // Settings
+  settings              UserSettings?
+  
+  // Admin
+  adminReports          Report[]
+  
+  // Startup (if company)
+  startup               Startup?
+  
+  // Timestamps
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  deletedAt             DateTime?
+  
+  @@index([email])
+  @@index([accountType])
+  @@index([verificationStatus])
+}
+
+model Profile {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  headline              String?               @db.VarChar(120)
+  bio                   String?               @db.VarChar(500)
+  avatar                String?
+  bannerImage           String?
+  location              String?
+  
+  // Status
+  openToWork            Boolean               @default(false)
+  activelyHiring        Boolean               @default(false)
+  profileScore          Int                   @default(0)
+  
+  // Visibility
+  visibility            ProfileVisibility     @default(PUBLIC)
+  messagePermission     MessagePermission     @default(EVERYONE)
+  
+  // Theme
+  themeConfig           ThemeConfig?
+  
+  // Experience
+  experiences           Experience[]
+  
+  // Education
+  educations            Education[]
+  
+  // Skills
+  skills                Skill[]
+  
+  // Activity stats
+  profileViews          Int                   @default(0)
+  postImpressions       Int                   @default(0)
+  searchAppearances     Int                   @default(0)
+  connectionGrowth      Int                   @default(0)
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([userId])
+}
+
+model ThemeConfig {
+  id                    String                @id @default(cuid())
+  profileId             String                @unique
+  profile               Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  preset                ThemePreset           @default(MIDNIGHT_PURPLE)
+  customAccentColor     String?               @db.VarChar(7)
+  cardStyle             CardStyle             @default(BORDERED)
+  fontChoice            FontChoice            @default(MODERN)
+  darkMode              Boolean               @default(false)
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+// ============================================================================
+// VERIFICATION MODELS
+// ============================================================================
+
+model IdentityVerification {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  documentType          String                // "AADHAAR", "PASSPORT", "DRIVER_LICENSE"
+  documentUrl           String
+  documentHash          String                @unique
+  scanStatus            ScanStatus            @default(PENDING)
+  scanResult            String?
+  
+  // Extracted data (from OCR)
+  extractedName         String?
+  extractedDOB          DateTime?
+  extractedId           String?
+  
+  // AI confidence
+  aiConfidence          Float?                // 0-1
+  requiresManualReview   Boolean               @default(false)
+  
+  // Review
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewStatus          VerificationStatus    @default(PENDING_REVIEW)
+  rejectionReason       String?
+  
+  linkedinUrl           String?
+  linkedinVerified      Boolean               @default(false)
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([userId])
+  @@index([scanStatus])
+}
+
+model CompanyVerification {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName           String
+  registrationDocument  String
+  documentHash          String                @unique
+  scanStatus            ScanStatus            @default(PENDING)
+  
+  gstNumber             String?
+  registrationNumber    String?
+  
+  websiteUrl            String?
+  websiteVerified       Boolean               @default(false)
+  
+  emailDomain           String?
+  emailDomainVerified   Boolean               @default(false)
+  
+  linkedinCompanyUrl    String?
+  linkedinVerified      Boolean               @default(false)
+  
+  // Review
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewStatus          VerificationStatus    @default(PENDING_REVIEW)
+  rejectionReason       String?
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([userId])
+  @@index([scanStatus])
+}
+
+// ============================================================================
+// PROFILE CONTENT MODELS
+// ============================================================================
+
+model Experience {
+  id                    String                @id @default(cuid())
+  profileId             String
+  profile               Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  title                 String
+  company               String
+  employmentType        EmploymentType
+  workMode              WorkMode
+  location              String?
+  
+  startDate             DateTime
+  endDate               DateTime?
+  currentlyWorking      Boolean               @default(false)
+  
+  description           String?               @db.VarChar(300)
+  
+  skills                Skill[]               @relation("ExperienceSkills")
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([profileId])
+}
+
+model Education {
+  id                    String                @id @default(cuid())
+  profileId             String
+  profile               Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  institution           String
+  degree                String
+  field                 String
+  
+  startYear             Int
+  endYear               Int?
+  
+  gpa                   Float?
+  
+  coursesInProgress     String?               // JSON array of course names
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([profileId])
+}
+
+model Skill {
+  id                    String                @id @default(cuid())
+  profileId             String
+  profile               Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  name                  String
+  proficiencyLevel      ProficiencyLevel
+  
+  endorsements          Int                   @default(0)
+  endorsedBy            String[]              // Array of user IDs
+  
+  certifications        Certification[]       @relation("SkillCertifications")
+  experiences           Experience[]          @relation("ExperienceSkills")
+  jobListings           JobListing[]          @relation("JobListingSkills")
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@unique([profileId, name])
+  @@index([profileId])
+}
+
+model Certification {
+  id                    String                @id @default(cuid())
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name                  String
+  issuingBody           String
+  issueDate             DateTime
+  expiryDate            DateTime?
+  
+  credentialId          String?
+  verificationUrl       String?
+  
+  description           String?               @db.VarChar(300)
+  
+  certificateUrl        String?
+  certificateHash       String?
+  scanStatus            ScanStatus            @default(PENDING)
+  
+  skills                Skill[]               @relation("SkillCertifications")
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([userId])
+  @@index([scanStatus])
+}
+
+model Project {
+  id                    String                @id @default(cuid())
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title                 String
+  shortDescription      String?               @db.VarChar(200)
+  description           String?               @db.VarChar(1000)
+  
+  techStack             String[]              // Array of tech names
+  
+  startDate             DateTime
+  endDate               DateTime?
+  ongoing               Boolean               @default(false)
+  
+  associatedWith        String?               // "company", "startup", "personal", "academic"
+  
+  media                 ProjectMedia[]
+  
+  collaborators         String[]              // Array of user IDs
+  
+  githubUrl             String?
+  liveDemoUrl           String?
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([userId])
+}
+
+model ProjectMedia {
+  id                    String                @id @default(cuid())
+  projectId             String
+  project               Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  type                  MediaType
+  url                   String
+  previewUrl            String?
+  
+  fileSize              Int?
+  fileName              String?
+  
+  scanStatus            ScanStatus            @default(PENDING)
+  scanResult            String?
+  
+  createdAt             DateTime              @default(now())
+  
+  @@index([projectId])
+  @@index([scanStatus])
+}
+
+// ============================================================================
+// STARTUP MODELS
+// ============================================================================
+
+model Startup {
+  id                    String                @id @default(cuid())
+  companyId             String                @unique
+  company               User                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  name                  String
+  logo                  String?
+  bannerImage           String?
+  tagline               String?
+  
+  tier                  StartupTier           @default(JUST_STARTED)
+  
+  foundedYear           Int?
+  hqLocation            String?
+  teamSize              String?               // "1-10", "11-50", etc.
+  
+  industry              String[]
+  techStack             String[]
+  
+  whyJoinUs             String?               @db.VarChar(800)
+  
+  fundingStage          String?               // "Pre-seed", "Seed", "Series A", etc.
+  totalRaised           String?               // "$1M", "$5M", etc.
+  
+  website               String?
+  linkedin              String?
+  twitter               String?
+  github                String?
+  crunchbase            String?
+  
+  culturePerks          String[]              // "Remote-friendly", "Equity offered", etc.
+  
+  jobListings           JobListing[]
+  
+  verifiedAt            DateTime?
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([companyId])
+  @@index([tier])
+}
+
+// ============================================================================
+// JOB & APPLICATION MODELS
+// ============================================================================
+
+model JobListing {
+  id                    String                @id @default(cuid())
+  giverId               String
+  giver                 User                  @relation(fields: [giverId], references: [id], onDelete: Cascade)
+  
+  startupId             String?
+  startup               Startup?              @relation(fields: [startupId], references: [id], onDelete: SetNull)
+  
+  title                 String
+  type                  JobListingType
+  workMode              WorkMode
+  location              String?
+  
+  salaryMin             Int?
+  salaryMax             Int?
+  salaryCurrency        String                @default("USD")
+  salaryNegotiable      Boolean               @default(false)
+  
+  experienceYears       Int?
+  experienceLevel       ExperienceLevel?
+  
+  skills                Skill[]               @relation("JobListingSkills")
+  certifications        String[]              // Array of certification names
+  
+  description           String?               @db.VarChar(2000)
+  perksAndBenefits      String?
+  interviewProcess      String?
+  
+  assessmentRequired    Boolean               @default(false)
+  assessmentDescription String?
+  
+  visaSponsorshipAvailable Boolean             @default(false)
+  
+  deadline              DateTime
+  openings              Int                   @default(1)
+  
+  status                String                @default("ACTIVE") // "ACTIVE", "PAUSED", "CLOSED"
+  
+  applications          Application[]
+  aiMatches             AIMatch[]
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([giverId])
+  @@index([startupId])
+  @@index([status])
+  @@index([deadline])
+}
+
+model Application {
+  id                    String                @id @default(cuid())
+  listingId             String
+  listing               JobListing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  seekerId              String
+  seeker                User                  @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  
+  status                ApplicationStatus     @default(APPLIED)
+  
+  coverLetter           String?               @db.VarChar(1000)
+  resumeUrl             String?
+  resumeHash            String?
+  resumeScanStatus      ScanStatus            @default(PENDING)
+  
+  customAnswers         String?               // JSON object of question -> answer
+  
+  viewedAt              DateTime?
+  shortlistedAt         DateTime?
+  interviewAt           DateTime?
+  offeredAt             DateTime?
+  rejectedAt            DateTime?
+  
+  notes                 String?               // Private notes from giver
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@unique([listingId, seekerId])
+  @@index([listingId])
+  @@index([seekerId])
+  @@index([status])
+}
+
+// ============================================================================
+// AI MATCHING MODELS
+// ============================================================================
+
+model AIMatch {
+  id                    String                @id @default(cuid())
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  listingId             String
+  listing               JobListing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  matchScore            Float                 // 0-100
+  matchReasons          String[]              // Array of reason strings
+  
+  type                  String                // "JOB", "INTERNSHIP", "STARTUP"
+  
+  viewed                Boolean               @default(false)
+  viewedAt              DateTime?
+  
+  generatedAt           DateTime              @default(now())
+  expiresAt             DateTime              // 24h from generation
+  
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
+  @@index([matchScore])
+}
+
+// ============================================================================
+// SOCIAL MODELS
+// ============================================================================
+
+model Connection {
+  id                    String                @id @default(cuid())
+  requesterId           String
+  requester             User                  @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  
+  targetId              String
+  target                User                  @relation("target", fields: [targetId], references: [id], onDelete: Cascade)
+  
+  status                ConnectionStatus      @default(PENDING)
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@unique([requesterId, targetId])
+  @@index([requesterId])
+  @@index([targetId])
+  @@index([status])
+}
+
+model Post {
+  id                    String                @id @default(cuid())
+  authorId              String
+  author                User                  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  type                  PostType
+  content               String?               @db.VarChar(2000)
+  
+  mediaUrl              String?
+  mediaType             MediaType?
+  mediaScanStatus       ScanStatus            @default(PENDING)
+  
+  reactions             Reaction[]
+  comments              Comment[]
+  
+  reportedCount         Int                   @default(0)
+  reports               Report[]
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model Reaction {
+  id                    String                @id @default(cuid())
+  postId                String
+  post                  Post                  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type                  ReactionType
+  
+  createdAt             DateTime              @default(now())
+  
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Comment {
+  id                    String                @id @default(cuid())
+  postId                String
+  post                  Post                  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  authorId              String
+  author                User                  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  parentCommentId       String?
+  parentComment         Comment?              @relation("replies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies               Comment[]             @relation("replies")
+  
+  content               String                @db.VarChar(500)
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentCommentId])
+}
+
+// ============================================================================
+// MESSAGING MODELS
+// ============================================================================
+
+model Conversation {
+  id                    String                @id @default(cuid())
+  
+  isGroup               Boolean               @default(false)
+  groupName             String?
+  
+  participants          User[]                @relation("participant")
+  messages              Message[]
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([createdAt])
+}
+
+model Message {
+  id                    String                @id @default(cuid())
+  conversationId        String
+  conversation          Conversation          @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  senderId              String
+  sender                User                  @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  recipientId           String?
+  recipient             User?                 @relation("recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  
+  content               String
+  fileUrl               String?
+  fileScanStatus        ScanStatus            @default(PENDING)
+  
+  sentAt                DateTime              @default(now())
+  seenAt                DateTime?
+  
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([recipientId])
+}
+
+// ============================================================================
+// NOTIFICATION MODELS
+// ============================================================================
+
+model Notification {
+  id                    String                @id @default(cuid())
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type                  NotificationType
+  title                 String
+  body                  String
+  link                  String?
+  
+  read                  Boolean               @default(false)
+  
+  createdAt             DateTime              @default(now())
+  
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// SETTINGS MODELS
+// ============================================================================
+
+model UserSettings {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Notifications
+  emailNotifications    Boolean               @default(true)
+  inAppNotifications    Boolean               @default(true)
+  emailDigestFrequency  EmailDigestFrequency  @default(DAILY)
+  
+  // AI Preferences
+  enableAISuggestions   Boolean               @default(true)
+  preferredJobTypes    String[]              // Array of job types
+  preferredWorkModes    String[]              // Array of work modes
+  preferredIndustries   String[]              // Array of industries
+  salaryRangeMin        Int?
+  salaryRangeMax        Int?
+  maxCommuteDistance    Int?                  // in km
+  
+  // Privacy
+  dataUsedForAI         Boolean               @default(true)
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([userId])
+}
+
+// ============================================================================
+// THREAT SCANNING MODELS
+// ============================================================================
+
+model ThreatScanLog {
+  id                    String                @id @default(cuid())
+  fileHash              String                @unique
+  fileType              String
+  fileName              String?
+  fileSize              Int?
+  
+  scanEngine            String                // "CLAMAV", "VIRUSTOTAL", "GOOGLE_VISION"
+  result                ScanStatus
+  threatName            String?
+  
+  userId                String?
+  
+  scannedAt             DateTime              @default(now())
+  
+  @@index([fileHash])
+  @@index([result])
+  @@index([scannedAt])
+}
+
+// ============================================================================
+// ADMIN MODELS
+// ============================================================================
+
+model Report {
+  id                    String                @id @default(cuid())
+  reportedById          String
+  reportedBy            User                  @relation(fields: [reportedById], references: [id], onDelete: Cascade)
+  
+  postId                String?
+  post                  Post?                 @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  reason                String
+  description           String?
+  
+  status                String                @default("PENDING") // "PENDING", "REVIEWED", "ACTIONED"
+  action                String?               // "WARN", "REMOVE", "BAN"
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  
+  @@index([reportedById])
+  @@index([postId])
+  @@index([status])
+}

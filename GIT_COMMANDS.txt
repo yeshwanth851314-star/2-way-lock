@@ -1,0 +1,261 @@
+================================================================================
+                    GIT COMMANDS - READY TO PASTE
+================================================================================
+
+REPOSITORY: https://github.com/yeshwanth851314-star/2-way-lock
+
+================================================================================
+COMMAND 1 - Initialize Git Repository
+================================================================================
+
+git init
+
+================================================================================
+COMMAND 2 - Add All Files
+================================================================================
+
+git add .
+
+================================================================================
+COMMAND 3 - Create Initial Commit
+================================================================================
+
+git commit -m "Initial commit: 2 Way Lock - Professional networking platform with Google OAuth and Vercel deployment"
+
+================================================================================
+COMMAND 4 - Rename Branch to Main
+================================================================================
+
+git branch -M main
+
+================================================================================
+COMMAND 5 - Add Remote Repository
+================================================================================
+
+git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git
+
+================================================================================
+COMMAND 6 - Push to GitHub
+================================================================================
+
+git push -u origin main
+
+================================================================================
+VERIFICATION COMMANDS
+================================================================================
+
+Check commit history:
+git log --oneline
+
+Check remote URL:
+git remote -v
+
+Check branch:
+git branch -a
+
+Check status:
+git status
+
+================================================================================
+ALL COMMANDS IN ONE BLOCK (Optional - Run All at Once)
+================================================================================
+
+git init && git add . && git commit -m "Initial commit: 2 Way Lock - Professional networking platform with Google OAuth and Vercel deployment" && git branch -M main && git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git && git push -u origin main
+
+================================================================================
+AUTHENTICATION
+================================================================================
+
+When you run: git push -u origin main
+
+You will be prompted:
+
+Username for 'https://github.com': yeshwanth851314-star
+
+Password for 'https://yeshwanth851314-star@github.com': [PASTE YOUR PERSONAL ACCESS TOKEN HERE]
+
+================================================================================
+HOW TO GET PERSONAL ACCESS TOKEN
+================================================================================
+
+1. Go to: https://github.com/settings/tokens
+2. Click "Generate new token"
+3. Name: 2-way-lock-push
+4. Select scopes: repo, workflow
+5. Click "Generate token"
+6. COPY THE TOKEN (you won't see it again!)
+7. Paste it when Git Bash asks for password
+
+================================================================================
+STEP-BY-STEP INSTRUCTIONS
+================================================================================
+
+1. Open Git Bash in your project folder
+   Right-click → "Git Bash Here"
+
+2. Copy and paste COMMAND 1:
+   git init
+
+3. Copy and paste COMMAND 2:
+   git add .
+
+4. Copy and paste COMMAND 3:
+   git commit -m "Initial commit: 2 Way Lock - Professional networking platform with Google OAuth and Vercel deployment"
+
+5. Copy and paste COMMAND 4:
+   git branch -M main
+
+6. Copy and paste COMMAND 5:
+   git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git
+
+7. Copy and paste COMMAND 6:
+   git push -u origin main
+
+8. When prompted for password, paste your Personal Access Token
+
+9. Wait for push to complete
+
+10. Verify success:
+    git log --oneline
+
+================================================================================
+WHAT GETS PUSHED
+================================================================================
+
+✓ src/ (all source code)
+✓ prisma/ (database schema)
+✓ .github/ (CI/CD workflows)
+✓ package.json
+✓ tsconfig.json
+✓ Dockerfile
+✓ docker-compose.yml
+✓ vercel.json
+✓ nginx.conf
+✓ .env
+✓ .gitignore
+✓ README.md
+✓ API_REFERENCE.md
+✓ GITHUB_SETUP.md
+✓ GIT_BASH_QUICK_START.md
+✓ COPY_PASTE_COMMANDS.md
+✓ DEPLOY_NOW.md
+✓ PUSH_TO_GITHUB.md
+✓ START_DEPLOYMENT.md
+✓ And all other files!
+
+================================================================================
+VERIFY ON GITHUB
+================================================================================
+
+After push completes, visit:
+https://github.com/yeshwanth851314-star/2-way-lock
+
+You should see:
+✓ All your files
+✓ Commit message
+✓ Branch: main
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+ERROR: "fatal: not a git repository"
+SOLUTION: git init
+
+ERROR: "fatal: remote origin already exists"
+SOLUTION: 
+git remote remove origin
+git remote add origin https://github.com/yeshwanth851314-star/2-way-lock.git
+
+ERROR: "Authentication failed"
+SOLUTION: Use Personal Access Token (not your GitHub password)
+
+ERROR: "nothing to commit, working tree clean"
+SOLUTION: git push -u origin main
+
+ERROR: "Updates were rejected because the tip of your current branch is behind"
+SOLUTION:
+git pull origin main
+git push -u origin main
+
+================================================================================
+NEXT STEPS AFTER PUSH
+================================================================================
+
+1. Deploy to Vercel:
+   npm i -g vercel
+   vercel login
+   vercel --prod
+
+2. Add Environment Variables in Vercel Dashboard:
+   DATABASE_URL
+   REDIS_URL
+   JWT_SECRET
+   JWT_REFRESH_SECRET
+   GOOGLE_CLIENT_ID
+   GOOGLE_CLIENT_SECRET
+   GOOGLE_CALLBACK_URL
+   OPENAI_API_KEY
+   NODE_ENV=production
+
+3. Setup Google OAuth:
+   - Go to Google Cloud Console
+   - Create OAuth 2.0 credentials
+   - Add redirect URIs
+   - Copy Client ID and Secret
+
+4. Setup Database:
+   - Use Vercel Postgres or external database
+   - Add DATABASE_URL to Vercel
+
+5. Setup Redis:
+   - Use Upstash Redis or external Redis
+   - Add REDIS_URL to Vercel
+
+================================================================================
+USEFUL GIT COMMANDS
+================================================================================
+
+Check status:
+git status
+
+View commit history:
+git log --oneline
+
+View all branches:
+git branch -a
+
+View remote URLs:
+git remote -v
+
+Pull latest changes:
+git pull origin main
+
+Push changes:
+git push origin main
+
+Create new branch:
+git checkout -b feature/your-feature
+
+Switch branch:
+git checkout main
+
+Delete local branch:
+git branch -d feature/your-feature
+
+Delete remote branch:
+git push origin --delete feature/your-feature
+
+================================================================================
+READY TO PUSH!
+================================================================================
+
+Your 2 Way Lock repository is ready to be pushed to GitHub!
+
+Repository: https://github.com/yeshwanth851314-star/2-way-lock
+
+Start with COMMAND 1 and follow the step-by-step instructions above.
+
+Good luck! 🚀
+
+================================================================================
