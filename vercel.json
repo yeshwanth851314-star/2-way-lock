@@ -1,21 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
-  "functions": {
-    "src/server.ts": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
   "routes": [
     {
-      "src": "/api/v1/(.*)",
-      "dest": "src/server.ts"
-    },
-    {
-      "src": "/health",
-      "dest": "src/server.ts"
+      "src": "/(.*)",
+      "dest": "dist/server.js"
     }
   ]
 }
